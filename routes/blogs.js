@@ -48,7 +48,6 @@ router.post('/', upload.single('image'), async (request, response) => {
   // console.log(request.body);
   let blog = new Blog({
     title: request.body.title,
-    author: request.body.author,
     description: request.body.description,
     img: request.file.filename,
   });
@@ -73,7 +72,6 @@ router.put('/:id', async (request, response) => {
   request.blog = await Blog.findById(request.params.id);
   let blog = request.blog;
   blog.title = request.body.title;
-  blog.author = request.body.author;
   blog.description = request.body.description;
 
   try {
