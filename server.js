@@ -1,6 +1,17 @@
 const express = require('express');
 const dotenv = require('dotenv');
 dotenv.config();
+const { requiresAuth } = require('express-openid-connect');
+const { auth } = require('express-openid-connect');
+
+const config = {
+  authRequired: false,
+  auth0Logout: true,
+  secret: 'a long, randomly-generated string stored in env',
+  baseURL: 'http://localhost:5000',
+  clientID: 'lOR5gIEMu4aK2CGLqATMdr5i6tmDUmTQ',
+  issuerBaseURL: 'https://dev-b3y8m--i.us.auth0.com'
+};
 
 //bring in mongoose
 const mongoose = require('mongoose');
@@ -23,13 +34,14 @@ mongoose.connect(process.env.URI, {useNewUrlParser: true, useUnifiedTopology: tr
 .catch((error)=>{
   console.log(error);
 })
+app.use(auth(config));
 
 //set template engine
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride('_method'));
 //route for the index
-app.get('/', async (request, response) => {
+app.get('/', requiresAuth(), async (request, response) => {
   let blogs = await Blog.find().sort({ timeCreated: 'desc' });
 
   response.render('index', { blogs: blogs });
@@ -37,6 +49,3 @@ app.get('/', async (request, response) => {
 
 app.use(express.static('public'));
 app.use('/blogs', blogRouter);
-
-//listen port
-app.listen(5000);
